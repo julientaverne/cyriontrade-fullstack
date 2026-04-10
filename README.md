@@ -3,7 +3,7 @@
 ## How to Run
 
 ```
-git clone https://github.com/cyriontrade/cyriontrade-fullstack.git
+git clone https://github.com/CyriontradeCo/cyriontrade-fullstack.git
 cd server && npm install && npm run dev
 cd ../client && npm install && npm start
 ```
