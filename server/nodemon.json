@@ -1,0 +1,26 @@
+{
+  "watch": [
+    "server.js",
+    "config",
+    "controllers",
+    "middleware",
+    "models",
+    "routes",
+    "scripts",
+    "utils"
+  ],
+  "ext": "js,mjs,cjs,json",
+  "ignore": [
+    ".git",
+    "node_modules/**",
+    "logs/**",
+    "*.log",
+    ".env",
+    ".env.*",
+    "tmp/**",
+    "temp/**",
+    "coverage/**"
+  ],
+  "delay": "500",
+  "legacyWatch": true
+}
