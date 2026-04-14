@@ -69,7 +69,7 @@ export default function useChartInteractions({
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement === fullscreenRef.current);
-  
+
       requestAnimationFrame(() => {
         if (chartRef.current && containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
@@ -81,9 +81,9 @@ export default function useChartInteractions({
         }
       });
     };
-  
+
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-  
+
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };

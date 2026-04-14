@@ -16,7 +16,6 @@ export default function useLightweightChart({ containerRef }) {
     const rect = container.getBoundingClientRect();
 
     const chart = createChart(container, {
-      // important: on désactive autoSize
       width: Math.max(Math.floor(rect.width), 300),
       height: Math.max(Math.floor(rect.height), 300),
       layout: {

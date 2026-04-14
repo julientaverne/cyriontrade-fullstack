@@ -9,6 +9,20 @@ import useMainSeries from "../../hooks/chart/useMainSeries";
 import useTechnicalIndicators from "../../hooks/chart/useTechnicalIndicators";
 import { normalizePriceData } from "../../utils/chart/priceChartAdapter";
 
+function safeRemoveSeries(chart, seriesRef) {
+  if (!chart || !seriesRef.current) {
+    return;
+  }
+
+  try {
+    chart.removeSeries(seriesRef.current);
+  } catch (error) {
+    // ignore: déjà supprimée ou chart en destruction
+  } finally {
+    seriesRef.current = null;
+  }
+}
+
 export default function PriceChart({ historicData, currency, days }) {
   const fullscreenRef = useRef(null);
   const containerRef = useRef(null);
@@ -53,10 +67,7 @@ export default function PriceChart({ historicData, currency, days }) {
     const chart = chartRef.current;
 
     if (!showSMA) {
-      if (smaSeriesRef.current) {
-        chart.removeSeries(smaSeriesRef.current);
-        smaSeriesRef.current = null;
-      }
+      safeRemoveSeries(chart, smaSeriesRef);
       return;
     }
 
@@ -70,6 +81,10 @@ export default function PriceChart({ historicData, currency, days }) {
     }
 
     smaSeriesRef.current.setData(smaData);
+
+    return () => {
+      // pas de remove ici : on laisse l’effet suivant ou le démontage gérer
+    };
   }, [chartRef, isReady, showSMA, smaData]);
 
   useEffect(() => {
@@ -80,10 +95,7 @@ export default function PriceChart({ historicData, currency, days }) {
     const chart = chartRef.current;
 
     if (!showEMA) {
-      if (emaSeriesRef.current) {
-        chart.removeSeries(emaSeriesRef.current);
-        emaSeriesRef.current = null;
-      }
+      safeRemoveSeries(chart, emaSeriesRef);
       return;
     }
 
@@ -97,7 +109,24 @@ export default function PriceChart({ historicData, currency, days }) {
     }
 
     emaSeriesRef.current.setData(emaData);
+
+    return () => {
+      // pas de remove ici non plus
+    };
   }, [chartRef, isReady, showEMA, emaData]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+  
+    return () => {
+      if (!chart) {
+        return;
+      }
+  
+      safeRemoveSeries(chart, smaSeriesRef);
+      safeRemoveSeries(chart, emaSeriesRef);
+    };
+  }, [chartRef]);
 
   const {
     tooltip,

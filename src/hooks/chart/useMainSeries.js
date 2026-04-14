@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   AreaSeries,
   BaselineSeries,
@@ -11,6 +11,7 @@ export default function useMainSeries({
   chartType,
   data,
 }) {
+  const mainSeriesRef = useRef(null);
   const [mainSeries, setMainSeries] = useState(null);
 
   const baselinePrice = useMemo(() => {
@@ -21,13 +22,25 @@ export default function useMainSeries({
     return data[0].value;
   }, [data]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isReady || !chartRef.current) {
-      return undefined;
+      return;
     }
 
     const chart = chartRef.current;
-    let createdSeries = null;
+
+    if (mainSeriesRef.current) {
+      try {
+        chart.removeSeries(mainSeriesRef.current);
+      } catch (error) {
+        // ignore
+      } finally {
+        mainSeriesRef.current = null;
+        setMainSeries(null);
+      }
+    }
+
+    let createdSeries;
 
     if (chartType === "area") {
       createdSeries = chart.addSeries(AreaSeries, {
@@ -54,31 +67,16 @@ export default function useMainSeries({
       });
     }
 
+    // très important : on hydrate la série immédiatement
+    if (Array.isArray(data) && data.length > 0) {
+      createdSeries.setData(data);
+    }
+
+    mainSeriesRef.current = createdSeries;
     setMainSeries(createdSeries);
 
-    return () => {
-      chart.removeSeries(createdSeries);
-      setMainSeries(null);
-    };
-  }, [chartRef, isReady, chartType, baselinePrice]);
-
-  useEffect(() => {
-    if (!mainSeries || !Array.isArray(data)) {
-      return;
-    }
-
-    mainSeries.setData(data);
-
-    if (chartType === "baseline" && baselinePrice) {
-      mainSeries.applyOptions({
-        baseValue: { type: "price", price: baselinePrice },
-      });
-    }
-
-    if (chartRef.current) {
-      chartRef.current.timeScale().fitContent();
-    }
-  }, [mainSeries, data, chartType, baselinePrice, chartRef]);
+    chart.timeScale().fitContent();
+  }, [chartRef, isReady, chartType, data, baselinePrice]);
 
   return {
     mainSeries,
