@@ -1,3 +1,45 @@
+/**
+ * useChartInteractions
+ *
+ * Centralizes user-facing chart interaction behavior.
+ *
+ * Responsibilities:
+ * - compute tooltip state from crosshair movement
+ * - expose chart navigation helpers (`fitContent`, `resetTimeScale`)
+ * - synchronize fullscreen state with the browser fullscreen API
+ * - resize/refit the chart after fullscreen transitions
+ *
+ * Architectural notes:
+ * - this hook isolates imperative chart event handling away from React components
+ * - it converts low-level chart callbacks into a small declarative state surface
+ * - it keeps the chart container component focused on orchestration and layout
+ *
+ * @param {Object} params
+ * @param {{ current: any }} params.chartRef Mutable ref containing the chart instance.
+ * @param {any} params.mainSeries Main chart series used as the tooltip anchor.
+ * @param {any} params.smaSeries Optional SMA overlay series.
+ * @param {any} params.emaSeries Optional EMA overlay series.
+ * @param {{ current: HTMLDivElement | null }} params.containerRef DOM ref for the chart container.
+ * @param {{ current: HTMLElement | null }} params.fullscreenRef DOM ref used as the fullscreen target.
+ * @param {string} params.currency Active currency code for price formatting.
+ * @param {number} params.days Current selected chart range in days.
+ * @returns {{
+ *   tooltip: {
+ *     visible: boolean,
+ *     left: number,
+ *     top: number,
+ *     date: string,
+ *     price: string,
+ *     sma: string,
+ *     ema: string
+ *   },
+ *   isFullscreen: boolean,
+ *   fitContent: () => void,
+ *   resetTimeScale: () => void,
+ *   toggleFullscreen: () => Promise<void>
+ * }}
+ */
+
 import { useCallback, useEffect, useState } from "react";
 import { formatChartTime, formatPrice } from "../../utils/chart/formatters";
 

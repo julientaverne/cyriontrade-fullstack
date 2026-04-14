@@ -1,3 +1,22 @@
+/**
+ * Price chart adapter test suite.
+ *
+ * These tests validate the normalization layer that transforms raw API price data
+ * into the shape expected by Lightweight Charts.
+ *
+ * Why this suite matters:
+ * - normalization is the entry point between backend data and chart rendering
+ * - any regression here would impact the main series, indicators, and tooltip values
+ * - validating this contract at the utility level is faster and more reliable
+ *   than discovering formatting issues through higher-level component tests
+ *
+ * Coverage strategy:
+ * - ensure chronological sorting
+ * - ensure empty input is handled safely
+ * - ensure numeric coercion is applied consistently
+ * - ensure already ordered data remains correct
+ */
+
 import { normalizePriceData } from "../../utils/chart/priceChartAdapter";
 
 describe("normalizePriceData", () => {

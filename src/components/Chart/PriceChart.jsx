@@ -1,3 +1,36 @@
+/**
+ * PriceChart
+ *
+ * Main chart container responsible for orchestrating:
+ * - chart initialization
+ * - main series rendering
+ * - technical indicator overlays (SMA / EMA)
+ * - user interactions (tooltip, zoom reset, fullscreen)
+ * - export behavior
+ * - toolbar-driven chart configuration
+ *
+ * Architectural notes:
+ * - the component owns UI state related to chart presentation
+ *   (chart type, enabled indicators, indicator periods)
+ * - raw API price data is normalized once through memoization before being
+ *   passed into chart-specific hooks
+ * - the main price series lifecycle is delegated to `useMainSeries`
+ * - overlay indicator series are managed here because they depend on local UI state
+ * - interactive behavior such as tooltip positioning and fullscreen synchronization
+ *   is isolated in dedicated hooks
+ *
+ * This split keeps the component readable while still making it the single
+ * orchestration point for chart rendering.
+ *
+ * @param {Object} props
+ * @param {Array<[number, number]>} props.historicData Raw price history as [timestamp, price] tuples.
+ * @param {string} props.currency Active currency code used for formatting and export naming.
+ * @param {number} props.days Currently selected time range.
+ * @param {(value: number) => void} props.onDaysChange Callback triggered when the selected time range changes.
+ * @param {Array<{ value: number, label: string }>} props.ranges Available time range options.
+ * @returns {JSX.Element}
+ */
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { LineSeries } from "lightweight-charts";
 import ChartToolbar from "./ChartToolbar";
@@ -23,7 +56,13 @@ function safeRemoveSeries(chart, seriesRef) {
   }
 }
 
-export default function PriceChart({ historicData, currency, days, onDaysChange, ranges, }) {
+export default function PriceChart({
+  historicData,
+  currency,
+  days,
+  onDaysChange,
+  ranges,
+}) {
   const fullscreenRef = useRef(null);
   const containerRef = useRef(null);
   const smaSeriesRef = useRef(null);
@@ -117,12 +156,12 @@ export default function PriceChart({ historicData, currency, days, onDaysChange,
 
   useEffect(() => {
     const chart = chartRef.current;
-  
+
     return () => {
       if (!chart) {
         return;
       }
-  
+
       safeRemoveSeries(chart, smaSeriesRef);
       safeRemoveSeries(chart, emaSeriesRef);
     };

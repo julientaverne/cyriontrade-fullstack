@@ -1,3 +1,21 @@
+/**
+ * Technical indicator utility test suite.
+ *
+ * These tests validate the core mathematical helpers used to derive
+ * overlay series from normalized price data.
+ *
+ * Why this suite matters:
+ * - SMA and EMA are foundational chart overlays in this exercise
+ * - errors here would propagate directly into chart rendering and tooltip values
+ * - keeping these calculations covered at the utility level makes failures
+ *   easier to diagnose than if they only surfaced through component tests
+ *
+ * Coverage strategy:
+ * - validate nominal calculation behavior
+ * - verify defensive behavior for invalid inputs
+ * - ensure the helpers remain pure and do not mutate their source dataset
+ */
+
 import { calculateSMA, calculateEMA } from "../../utils/chart/indicator";
 
 const sampleData = [

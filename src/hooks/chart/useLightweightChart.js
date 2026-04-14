@@ -1,3 +1,33 @@
+/**
+ * useLightweightChart
+ *
+ * Creates and manages the lifecycle of a Lightweight Charts instance.
+ *
+ * Responsibilities:
+ * - initialize the chart once the container DOM node is available
+ * - apply the shared base chart configuration
+ * - keep the chart dimensions synchronized with its container
+ * - clean up chart and observer resources on unmount
+ *
+ * Why this logic lives in a hook:
+ * - Lightweight Charts exposes an imperative API
+ * - chart creation depends on a mounted DOM element
+ * - resize management is an infrastructure concern rather than a UI concern
+ *
+ * Architectural notes:
+ * - the hook deliberately owns only the chart instance lifecycle
+ * - series creation and data binding are handled elsewhere
+ * - this keeps responsibilities separated between:
+ *   - chart bootstrap
+ *   - series orchestration
+ *   - interactions
+ *   - export behavior
+ *
+ * @param {Object} params
+ * @param {{ current: HTMLDivElement | null }} params.containerRef Ref pointing to the chart container element.
+ * @returns {{ chartRef: { current: any }, isReady: boolean }}
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { createChart } from "lightweight-charts";
 

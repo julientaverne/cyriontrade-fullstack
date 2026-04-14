@@ -1,3 +1,35 @@
+/**
+ * CoinInfo
+ *
+ * This component was refactored from the original implementation to improve
+ * separation of concerns.
+ *
+ * Original behavior:
+ * - fetched historical data
+ * - rendered the chart directly with Chart.js / react-chartjs-2
+ * - rendered the time-range buttons locally below the chart
+ *
+ * Updated behavior:
+ * - still owns historical data fetching
+ * - still owns the selected time-range state (`days`)
+ * - delegates all chart rendering and chart-specific interactions to `PriceChart`
+ *
+ * Key improvements introduced by this refactor:
+ * - charting concerns are now isolated in a dedicated component
+ * - the time-range controls are no longer rendered separately below the chart;
+ *   they are passed into the chart toolbar for a more cohesive UX
+ * - `coin.id` was added to the effect dependencies to ensure chart data is
+ *   refreshed correctly when the displayed asset changes
+ *
+ * Architectural intent:
+ * - keep `CoinInfo` focused on data loading and high-level state ownership
+ * - move visualization logic, chart lifecycle, interactions, and chart controls
+ *   into a specialized chart component
+ *
+ * This makes the code easier to maintain, test, and extend while keeping the
+ * API/data flow explicit.
+ */
+
 import { useEffect, useState } from "react";
 import {
   CircularProgress,
@@ -5,7 +37,6 @@ import {
   makeStyles,
   ThemeProvider,
 } from "@material-ui/core";
-//import SelectButton from "./SelectButton";
 import { chartDays } from "../config/data";
 import { CryptoState } from "../CryptoContext";
 import { cryptoAPI } from "../services/api";
@@ -37,7 +68,11 @@ const CoinInfo = ({ coin }) => {
 
   const fetchHistoricData = async () => {
     try {
-      const { data } = await cryptoAPI.getHistoricalChart(coin.id, days, currency);
+      const { data } = await cryptoAPI.getHistoricalChart(
+        coin.id,
+        days,
+        currency
+      );
       setHistoricData(data.prices);
     } catch (error) {
       setAlert({
@@ -83,8 +118,6 @@ const CoinInfo = ({ coin }) => {
               onDaysChange={setDays}
               ranges={chartDays}
             />
-
-            
           </>
         )}
       </div>

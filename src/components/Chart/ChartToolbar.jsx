@@ -1,3 +1,49 @@
+/**
+ * ChartToolbar
+ *
+ * Provides the full user interaction surface for the chart view.
+ *
+ * Layout strategy:
+ * - row 1:
+ *   - left: time range selection
+ *   - right: chart-wide actions (fit, reset, fullscreen, export)
+ * - row 2:
+ *   - left: main chart type selection
+ *   - right: technical indicator configuration (SMA / EMA)
+ *
+ * Architectural notes:
+ * - this component is intentionally stateless
+ * - all chart lifecycle, series management, and data orchestration live in
+ *   parent components and dedicated hooks
+ * - the toolbar only communicates user intent through callbacks
+ *
+ * This makes the component:
+ * - easy to test
+ * - easy to iterate on visually
+ * - decoupled from the imperative chart API
+ *
+ * @param {Object} props
+ * @param {"line" | "area" | "baseline"} props.chartType Current main chart series type.
+ * @param {(value: "line" | "area" | "baseline") => void} props.onChartTypeChange Callback triggered when the chart type changes.
+ * @param {number} props.days Currently selected time range value.
+ * @param {(value: number) => void} props.onDaysChange Callback triggered when the time range changes.
+ * @param {Array<{ value: number, label: string }>} props.ranges Available time range options.
+ * @param {boolean} props.showSMA Whether the SMA overlay is enabled.
+ * @param {() => void} props.onToggleSMA Callback triggered when SMA visibility changes.
+ * @param {number} props.smaPeriod Current SMA period.
+ * @param {(value: number) => void} props.onSmaPeriodChange Callback triggered when the SMA period changes.
+ * @param {boolean} props.showEMA Whether the EMA overlay is enabled.
+ * @param {() => void} props.onToggleEMA Callback triggered when EMA visibility changes.
+ * @param {number} props.emaPeriod Current EMA period.
+ * @param {(value: number) => void} props.onEmaPeriodChange Callback triggered when the EMA period changes.
+ * @param {() => void} props.onFitContent Fits the chart to the full dataset.
+ * @param {() => void} props.onResetTimeScale Resets time scale zoom/pan state.
+ * @param {() => void} props.onToggleFullscreen Toggles fullscreen mode.
+ * @param {boolean} props.isFullscreen Whether the chart is currently in fullscreen mode.
+ * @param {() => void} props.onExport Exports the chart as a PNG image.
+ * @returns {JSX.Element}
+ */
+
 import React from "react";
 import {
   Box,

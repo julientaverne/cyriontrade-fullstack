@@ -1,3 +1,21 @@
+/**
+ * Formatter utility test suite.
+ *
+ * These tests validate the display-oriented helper functions used by the chart UI,
+ * especially in tooltip rendering.
+ *
+ * Why this suite matters:
+ * - formatting helpers directly affect user-facing readability
+ * - even small regressions in date/price formatting are highly visible in the UI
+ * - keeping this logic covered at the utility level avoids pushing formatting
+ *   concerns into more fragile component tests
+ *
+ * Coverage strategy:
+ * - verify both supported time display modes
+ * - verify graceful fallback behavior for missing or invalid input
+ * - verify that currency formatting produces a user-facing monetary label
+ */
+
 import { formatChartTime, formatPrice } from "../../utils/chart/formatters";
 
 describe("formatChartTime", () => {
