@@ -19,39 +19,25 @@ const useStyles = makeStyles((theme) => ({
     gap: 12,
     marginBottom: theme.spacing(2),
   },
-  topRow: {
+  row: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     gap: 12,
     flexWrap: "wrap",
   },
-  middleRow: {
+  leftGroup: {
     display: "flex",
-    justifyContent: "flex-start",
     alignItems: "center",
     gap: 12,
     flexWrap: "wrap",
   },
-  bottomRow: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-  actionGroup: {
+  rightGroup: {
     display: "flex",
     alignItems: "center",
     gap: 12,
     flexWrap: "wrap",
     marginLeft: "auto",
-  },
-  rangeGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    flexWrap: "wrap",
   },
   select: {
     minWidth: 140,
@@ -138,18 +124,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/**
- * ChartToolbar
- *
- * Organizes chart controls into three logical rows:
- * - row 1: chart view selection + global chart actions
- * - row 2: time range selection
- * - row 3: technical indicator controls
- *
- * This component is intentionally stateless and fully controlled by the parent.
- * It focuses purely on rendering and user interaction, while chart lifecycle,
- * data fetching, and series orchestration remain outside.
- */
 export default function ChartToolbar({
   chartType,
   onChartTypeChange,
@@ -174,20 +148,25 @@ export default function ChartToolbar({
 
   return (
     <Box className={classes.toolbar}>
-      <Box className={classes.topRow}>
-        <FormControl variant="outlined" size="small">
-          <Select
-            value={chartType}
-            onChange={(event) => onChartTypeChange(event.target.value)}
-            className={classes.select}
-          >
-            <MenuItem value="line">Line</MenuItem>
-            <MenuItem value="area">Area</MenuItem>
-            <MenuItem value="baseline">Baseline</MenuItem>
-          </Select>
-        </FormControl>
+      <Box className={classes.row}>
+        <Box className={classes.leftGroup}>
+          {ranges.map((range) => (
+            <Button
+              key={range.value}
+              variant={range.value === days ? "contained" : "outlined"}
+              onClick={() => onDaysChange(range.value)}
+              className={
+                range.value === days
+                  ? classes.primaryButton
+                  : classes.outlinedButton
+              }
+            >
+              {range.label}
+            </Button>
+          ))}
+        </Box>
 
-        <Box className={classes.actionGroup}>
+        <Box className={classes.rightGroup}>
           <Button
             variant="outlined"
             onClick={onFitContent}
@@ -222,71 +201,68 @@ export default function ChartToolbar({
         </Box>
       </Box>
 
-      <Box className={classes.middleRow}>
-        <Box className={classes.rangeGroup}>
-          {ranges.map((range) => (
-            <Button
-              key={range.value}
-              variant={range.value === days ? "contained" : "outlined"}
-              onClick={() => onDaysChange(range.value)}
-              className={
-                range.value === days
-                  ? classes.primaryButton
-                  : classes.outlinedButton
-              }
+      <Box className={classes.row}>
+        <Box className={classes.leftGroup}>
+          <FormControl variant="outlined" size="small">
+            <Select
+              value={chartType}
+              onChange={(event) => onChartTypeChange(event.target.value)}
+              className={classes.select}
             >
-              {range.label}
-            </Button>
-          ))}
+              <MenuItem value="line">Line</MenuItem>
+              <MenuItem value="area">Area</MenuItem>
+              <MenuItem value="baseline">Baseline</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
-      </Box>
 
-      <Box className={classes.bottomRow}>
-        <FormControlLabel
-          className={classes.switchLabel}
-          control={
-            <Switch
-              checked={showSMA}
-              onChange={onToggleSMA}
-              className={classes.switchRoot}
-            />
-          }
-          label="SMA"
-        />
+        <Box className={classes.rightGroup}>
+          <FormControlLabel
+            className={classes.switchLabel}
+            control={
+              <Switch
+                checked={showSMA}
+                onChange={onToggleSMA}
+                className={classes.switchRoot}
+              />
+            }
+            label="SMA"
+          />
 
-        <TextField
-          type="number"
-          label="SMA"
-          variant="outlined"
-          size="small"
-          value={smaPeriod}
-          onChange={(event) => onSmaPeriodChange(Number(event.target.value))}
-          inputProps={{ min: 2, max: 200 }}
-          className={classes.input}
-        />
+          <TextField
+            type="number"
+            label="SMA"
+            variant="outlined"
+            size="small"
+            value={smaPeriod}
+            onChange={(event) => onSmaPeriodChange(Number(event.target.value))}
+            inputProps={{ min: 2, max: 200 }}
+            className={classes.input}
+          />
 
-        <FormControlLabel
-          className={classes.switchLabel}
-          control={
-            <Switch
-              checked={showEMA}
-              onChange={onToggleEMA}
-              className={classes.switchRoot}
-            />
-          }
-          label="EMA"
-        />
+          <FormControlLabel
+            className={classes.switchLabel}
+            control={
+              <Switch
+                checked={showEMA}
+                onChange={onToggleEMA}
+                className={classes.switchRoot}
+              />
+            }
+            label="EMA"
+          />
 
-        <TextField
-          type="number"
-          label="EMA"
-          variant="outlined"
-          size="small"
-          value={emaPeriod}
-          onChange={(event) => onEmaPeriodChange(Number(event.target.value))}
-          inputProps={{ min: 2, max: 200 }}
-          className={classes.input}
-        />
+          <TextField
+            type="number"
+            label="EMA"
+            variant="outlined"
+            size="small"
+            value={emaPeriod}
+            onChange={(event) => onEmaPeriodChange(Number(event.target.value))}
+            inputProps={{ min: 2, max: 200 }}
+            className={classes.input}
+          />
+        </Box>
       </Box>
     </Box>
   );
