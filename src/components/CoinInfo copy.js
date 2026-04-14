@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
 import {
   CircularProgress,
   createTheme,
@@ -9,30 +10,30 @@ import SelectButton from "./SelectButton";
 import { chartDays } from "../config/data";
 import { CryptoState } from "../CryptoContext";
 import { cryptoAPI } from "../services/api";
-import PriceChart from "./Chart/PriceChart";
-
-const useStyles = makeStyles((theme) => ({
-  container: {
-    width: "75%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 25,
-    padding: 40,
-    [theme.breakpoints.down("md")]: {
-      width: "100%",
-      marginTop: 0,
-      padding: 20,
-      paddingTop: 0,
-    },
-  },
-}));
 
 const CoinInfo = ({ coin }) => {
   const [historicData, setHistoricData] = useState();
   const [days, setDays] = useState(1);
   const { currency, setAlert } = CryptoState();
+
+  const useStyles = makeStyles((theme) => ({
+    container: {
+      width: "75%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 25,
+      padding: 40,
+      [theme.breakpoints.down("md")]: {
+        width: "100%",
+        marginTop: 0,
+        padding: 20,
+        paddingTop: 0,
+      },
+    },
+  }));
+
   const classes = useStyles();
 
   const fetchHistoricData = async () => {
@@ -42,10 +43,7 @@ const CoinInfo = ({ coin }) => {
     } catch (error) {
       setAlert({
         open: true,
-        message:
-          error.response?.data?.error ||
-          error.message ||
-          "Failed to fetch chart data. Please ensure the server is running.",
+        message: error.response?.data?.error || error.message || "Failed to fetch chart data. Please ensure the server is running.",
         type: "error",
       });
     }
@@ -54,7 +52,7 @@ const CoinInfo = ({ coin }) => {
   useEffect(() => {
     fetchHistoricData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days, currency, coin.id]);
+  }, [days, currency]);
 
   const darkTheme = createTheme({
     palette: {
@@ -76,12 +74,33 @@ const CoinInfo = ({ coin }) => {
           />
         ) : (
           <>
-            <PriceChart
-              historicData={historicData}
-              currency={currency}
-              days={days}
-            />
+            <Line
+              data={{
+                labels: historicData.map((coin) => {
+                  let date = new Date(coin[0]);
+                  let time =
+                    date.getHours() > 12
+                      ? `${date.getHours() - 12}:${date.getMinutes()} PM`
+                      : `${date.getHours()}:${date.getMinutes()} AM`;
+                  return days === 1 ? time : date.toLocaleDateString();
+                }),
 
+                datasets: [
+                  {
+                    data: historicData.map((coin) => coin[1]),
+                    label: `Price ( Past ${days} Days ) in ${currency}`,
+                    borderColor: "#EEBC1D",
+                  },
+                ],
+              }}
+              options={{
+                elements: {
+                  point: {
+                    radius: 1,
+                  },
+                },
+              }}
+            />
             <div
               style={{
                 display: "flex",

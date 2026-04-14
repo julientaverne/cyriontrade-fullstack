@@ -16,7 +16,7 @@ const { requestLogger } = require('./middleware/activityLogger');
 const internalLogger = require("./middleware/internalLogger");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Trust proxy (for rate limiting behind reverse proxy and proper IP detection)
 app.set('trust proxy', true);
