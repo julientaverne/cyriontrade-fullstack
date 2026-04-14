@@ -1,23 +1,3 @@
-/**
- * ChartToolbar
- *
- * Centralizes all user-facing chart controls.
- *
- * Responsibilities:
- * - switch the main chart visualization type (line / area / baseline)
- * - enable or disable technical indicators
- * - adjust SMA / EMA periods
- * - trigger chart navigation and export actions
- *
- * Architectural notes:
- * - this component is intentionally stateless
- * - it does not contain charting logic or persistent UI state
- * - all business logic remains in the parent component and dedicated hooks
- *
- * This separation keeps the toolbar purely declarative, easy to test,
- * and independent from the imperative TradingView Lightweight Charts API.
- */
-
 import React from "react";
 import {
   Box,
@@ -31,12 +11,50 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   toolbar: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
     gap: 12,
+    marginBottom: theme.spacing(2),
+  },
+  topRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  middleRow: {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  bottomRow: {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  actionGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+    marginLeft: "auto",
+  },
+  rangeGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
   },
   select: {
-    minWidth: 120,
+    minWidth: 140,
     color: "#EEBC1D",
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: "rgba(238, 188, 29, 0.6)",
@@ -120,9 +138,24 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+/**
+ * ChartToolbar
+ *
+ * Organizes chart controls into three logical rows:
+ * - row 1: chart view selection + global chart actions
+ * - row 2: time range selection
+ * - row 3: technical indicator controls
+ *
+ * This component is intentionally stateless and fully controlled by the parent.
+ * It focuses purely on rendering and user interaction, while chart lifecycle,
+ * data fetching, and series orchestration remain outside.
+ */
 export default function ChartToolbar({
   chartType,
   onChartTypeChange,
+  days,
+  onDaysChange,
+  ranges,
   showSMA,
   onToggleSMA,
   smaPeriod,
@@ -140,102 +173,121 @@ export default function ChartToolbar({
   const classes = useStyles();
 
   return (
-    <Box
-      display="flex"
-      flexWrap="wrap"
-      mb={2}
-      alignItems="center"
-      className={classes.toolbar}
-    >
-      <FormControl variant="outlined" size="small">
-        <Select
-          value={chartType}
-          onChange={(event) => onChartTypeChange(event.target.value)}
-          className={classes.select}
-        >
-          <MenuItem value="line">Line</MenuItem>
-          <MenuItem value="area">Area</MenuItem>
-          <MenuItem value="baseline">Baseline</MenuItem>
-        </Select>
-      </FormControl>
+    <Box className={classes.toolbar}>
+      <Box className={classes.topRow}>
+        <FormControl variant="outlined" size="small">
+          <Select
+            value={chartType}
+            onChange={(event) => onChartTypeChange(event.target.value)}
+            className={classes.select}
+          >
+            <MenuItem value="line">Line</MenuItem>
+            <MenuItem value="area">Area</MenuItem>
+            <MenuItem value="baseline">Baseline</MenuItem>
+          </Select>
+        </FormControl>
 
-      <FormControlLabel
-        className={classes.switchLabel}
-        control={
-          <Switch
-            checked={showSMA}
-            onChange={onToggleSMA}
-            className={classes.switchRoot}
-          />
-        }
-        label="SMA"
-      />
+        <Box className={classes.actionGroup}>
+          <Button
+            variant="outlined"
+            onClick={onFitContent}
+            className={classes.outlinedButton}
+          >
+            Fit content
+          </Button>
 
-      <TextField
-        type="number"
-        label="SMA"
-        variant="outlined"
-        size="small"
-        value={smaPeriod}
-        onChange={(event) => onSmaPeriodChange(Number(event.target.value))}
-        inputProps={{ min: 2, max: 200 }}
-        className={classes.input}
-      />
+          <Button
+            variant="outlined"
+            onClick={onResetTimeScale}
+            className={classes.outlinedButton}
+          >
+            Reset view
+          </Button>
 
-      <FormControlLabel
-        className={classes.switchLabel}
-        control={
-          <Switch
-            checked={showEMA}
-            onChange={onToggleEMA}
-            className={classes.switchRoot}
-          />
-        }
-        label="EMA"
-      />
+          <Button
+            variant="outlined"
+            onClick={onToggleFullscreen}
+            className={classes.outlinedButton}
+          >
+            {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          </Button>
 
-      <TextField
-        type="number"
-        label="EMA"
-        variant="outlined"
-        size="small"
-        value={emaPeriod}
-        onChange={(event) => onEmaPeriodChange(Number(event.target.value))}
-        inputProps={{ min: 2, max: 200 }}
-        className={classes.input}
-      />
+          <Button
+            variant="contained"
+            onClick={onExport}
+            className={classes.primaryButton}
+          >
+            Export PNG
+          </Button>
+        </Box>
+      </Box>
 
-      <Button
-        variant="outlined"
-        onClick={onFitContent}
-        className={classes.outlinedButton}
-      >
-        Fit content
-      </Button>
+      <Box className={classes.middleRow}>
+        <Box className={classes.rangeGroup}>
+          {ranges.map((range) => (
+            <Button
+              key={range.value}
+              variant={range.value === days ? "contained" : "outlined"}
+              onClick={() => onDaysChange(range.value)}
+              className={
+                range.value === days
+                  ? classes.primaryButton
+                  : classes.outlinedButton
+              }
+            >
+              {range.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
 
-      <Button
-        variant="outlined"
-        onClick={onResetTimeScale}
-        className={classes.outlinedButton}
-      >
-        Reset view
-      </Button>
+      <Box className={classes.bottomRow}>
+        <FormControlLabel
+          className={classes.switchLabel}
+          control={
+            <Switch
+              checked={showSMA}
+              onChange={onToggleSMA}
+              className={classes.switchRoot}
+            />
+          }
+          label="SMA"
+        />
 
-      <Button
-        variant="outlined"
-        onClick={onToggleFullscreen}
-        className={classes.outlinedButton}
-      >
-        {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-      </Button>
+        <TextField
+          type="number"
+          label="SMA"
+          variant="outlined"
+          size="small"
+          value={smaPeriod}
+          onChange={(event) => onSmaPeriodChange(Number(event.target.value))}
+          inputProps={{ min: 2, max: 200 }}
+          className={classes.input}
+        />
 
-      <Button
-        variant="contained"
-        onClick={onExport}
-        className={classes.primaryButton}
-      >
-        Export PNG
-      </Button>
+        <FormControlLabel
+          className={classes.switchLabel}
+          control={
+            <Switch
+              checked={showEMA}
+              onChange={onToggleEMA}
+              className={classes.switchRoot}
+            />
+          }
+          label="EMA"
+        />
+
+        <TextField
+          type="number"
+          label="EMA"
+          variant="outlined"
+          size="small"
+          value={emaPeriod}
+          onChange={(event) => onEmaPeriodChange(Number(event.target.value))}
+          inputProps={{ min: 2, max: 200 }}
+          className={classes.input}
+        />
+      </Box>
     </Box>
   );
 }

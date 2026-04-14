@@ -23,7 +23,7 @@ function safeRemoveSeries(chart, seriesRef) {
   }
 }
 
-export default function PriceChart({ historicData, currency, days }) {
+export default function PriceChart({ historicData, currency, days, onDaysChange, ranges, }) {
   const fullscreenRef = useRef(null);
   const containerRef = useRef(null);
   const smaSeriesRef = useRef(null);
@@ -161,6 +161,9 @@ export default function PriceChart({ historicData, currency, days }) {
       <ChartToolbar
         chartType={chartType}
         onChartTypeChange={setChartType}
+        days={days}
+        onDaysChange={onDaysChange}
+        ranges={ranges}
         showSMA={showSMA}
         onToggleSMA={() => setShowSMA((prev) => !prev)}
         smaPeriod={smaPeriod}
