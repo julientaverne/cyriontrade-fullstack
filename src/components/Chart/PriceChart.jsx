@@ -137,6 +137,8 @@ export default function PriceChart({ historicData, currency, days }) {
   } = useChartInteractions({
     chartRef,
     mainSeries,
+    smaSeries: smaSeriesRef.current,
+    emaSeries: emaSeriesRef.current,
     containerRef,
     fullscreenRef,
     currency,

@@ -7,11 +7,31 @@ const hiddenTooltip = {
   top: 0,
   date: "",
   price: "",
+  sma: "",
+  ema: "",
 };
+
+function extractSeriesValue(seriesData) {
+  if (!seriesData) {
+    return undefined;
+  }
+
+  if (seriesData.value !== undefined) {
+    return seriesData.value;
+  }
+
+  if (seriesData.close !== undefined) {
+    return seriesData.close;
+  }
+
+  return undefined;
+}
 
 export default function useChartInteractions({
   chartRef,
   mainSeries,
+  smaSeries,
+  emaSeries,
   containerRef,
   fullscreenRef,
   currency,
@@ -39,23 +59,31 @@ export default function useChartInteractions({
         return;
       }
 
-      const data = param.seriesData.get(mainSeries);
+      const mainData = param.seriesData.get(mainSeries);
 
-      if (!data) {
+      if (!mainData) {
         setTooltip(hiddenTooltip);
         return;
       }
 
-      const price = data.value !== undefined ? data.value : data.close;
+      const smaData = smaSeries ? param.seriesData.get(smaSeries) : undefined;
+      const emaData = emaSeries ? param.seriesData.get(emaSeries) : undefined;
+
+      const mainValue = extractSeriesValue(mainData);
+      const smaValue = extractSeriesValue(smaData);
+      const emaValue = extractSeriesValue(emaData);
+
       const width = containerRef.current.clientWidth;
-      const left = Math.min(param.point.x + 12, Math.max(width - 200, 0));
+      const left = Math.min(param.point.x + 12, Math.max(width - 220, 0));
 
       setTooltip({
         visible: true,
         left,
         top: Math.max(param.point.y + 12, 12),
         date: formatChartTime(param.time, days),
-        price: formatPrice(price, currency),
+        price: formatPrice(mainValue, currency),
+        sma: smaValue !== undefined ? formatPrice(smaValue, currency) : "",
+        ema: emaValue !== undefined ? formatPrice(emaValue, currency) : "",
       });
     };
 
@@ -64,7 +92,15 @@ export default function useChartInteractions({
     return () => {
       chart.unsubscribeCrosshairMove(handleCrosshairMove);
     };
-  }, [chartRef, mainSeries, containerRef, currency, days]);
+  }, [
+    chartRef,
+    mainSeries,
+    smaSeries,
+    emaSeries,
+    containerRef,
+    currency,
+    days,
+  ]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {

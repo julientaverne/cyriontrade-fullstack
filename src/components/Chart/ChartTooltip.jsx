@@ -11,7 +11,7 @@ export default function ChartTooltip({ tooltip }) {
         position: "absolute",
         left: tooltip.left,
         top: tooltip.top,
-        minWidth: 160,
+        minWidth: 180,
         padding: 12,
         borderRadius: 10,
         background: "rgba(0,0,0,0.85)",
@@ -22,7 +22,9 @@ export default function ChartTooltip({ tooltip }) {
       }}
     >
       <div style={{ fontWeight: 700, marginBottom: 6 }}>{tooltip.date}</div>
-      <div>{tooltip.price}</div>
+      <div>Price: {tooltip.price}</div>
+      {tooltip.sma && <div>SMA: {tooltip.sma}</div>}
+      {tooltip.ema && <div>EMA: {tooltip.ema}</div>}
     </div>
   );
 }
