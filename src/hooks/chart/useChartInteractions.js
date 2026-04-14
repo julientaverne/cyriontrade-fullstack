@@ -69,14 +69,25 @@ export default function useChartInteractions({
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement === fullscreenRef.current);
+  
+      requestAnimationFrame(() => {
+        if (chartRef.current && containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          chartRef.current.resize(
+            Math.max(Math.floor(rect.width), 300),
+            Math.max(Math.floor(rect.height), 300)
+          );
+          chartRef.current.timeScale().fitContent();
+        }
+      });
     };
-
+  
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-
+  
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-  }, [fullscreenRef]);
+  }, [fullscreenRef, chartRef, containerRef]);
 
   const fitContent = useCallback(() => {
     if (chartRef.current) {

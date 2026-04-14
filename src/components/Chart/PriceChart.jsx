@@ -151,6 +151,7 @@ export default function PriceChart({ historicData, currency, days }) {
           style={{
             width: "100%",
             height: isFullscreen ? "calc(100vh - 180px)" : 500,
+            minHeight: 300,
           }}
         />
         <ChartTooltip tooltip={tooltip} />
